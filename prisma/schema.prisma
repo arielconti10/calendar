@@ -11,3 +11,15 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
   shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING") // used for migrations
 }
+
+
+model Appointment {
+  id             Int      @id @default(autoincrement())
+  date           DateTime
+  place          String
+  clientName     String
+  estimatedValue Float
+  status         String
+  notes          String
+  bodyPart       String
+}
