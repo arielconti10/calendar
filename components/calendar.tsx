@@ -10,11 +10,12 @@ import {
   momentLocalizer,
 } from 'react-big-calendar'
 import * as dates from '@/utils/dates'
-import { Appointment } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import Image from 'next/image'
 
 const mLocalizer = momentLocalizer(moment)
 
@@ -24,6 +25,12 @@ const ColoredDateCellWrapper = ({ children }: { children: React.ReactNode }) =>
       backgroundColor: 'lightblue',
     },
   })
+
+type Appointment = Prisma.AppointmentGetPayload<{
+  include: {
+    images: true
+  }
+}>;
 
 interface BasicProps {
   events: Appointment[]
@@ -37,6 +44,10 @@ export default function Basic({
   ...props
 }: BasicProps) {
   const [showDialog, setShowDialog] = React.useState(false)
+
+  // selectedEvent is one Appointment, we need to include the images in the appointment
+
+
   const [selectedEvent, setSelectedEvent] = React.useState<Appointment | null>(null)
 
   const { defaultDate, max, views } = useMemo(
@@ -134,11 +145,19 @@ export default function Basic({
                 </Label>
                 <Input id="estimatedValue" type="number" value={selectedEvent.estimatedValue!!} disabled className="col-span-3" />
               </div>
+
+              {selectedEvent.images && selectedEvent.images.length > 0 && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  {selectedEvent.images.map((image) => (
+                    <Image alt="" src={image.url} key={image.id} width="200" height="100" />
+                  ))}
+                </div>
+              )}
             </div>
           )}
-          <DialogFooter>
+          {/* <DialogFooter>
             <Button type="submit">Save changes</Button>
-          </DialogFooter>
+          </DialogFooter> */}
         </DialogContent>
       </Dialog>
     </div>

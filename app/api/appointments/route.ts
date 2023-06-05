@@ -18,7 +18,12 @@ const bodySchema = z.object({
 
 export async function GET() {
   const client = new PrismaClient()
-  const appointments = await client.appointment.findMany()
+
+  // get all appointments from the database, including the images
+  const appointments = await client.appointment.findMany({
+    include: { images: true },
+  })
+
   return NextResponse.json(appointments)
 }
 
