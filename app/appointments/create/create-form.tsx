@@ -1,10 +1,10 @@
 "use client"
 import { useState } from "react"
-import { DANGEROUS__uploadFiles } from "uploadthing/client";
+import { Loader2 } from "lucide-react"
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
-import { Calendar as CalendarIcon, Check, ChevronsUpDown } from "lucide-react"
+import { Calendar as CalendarIcon } from "lucide-react"
 import { useForm } from "react-hook-form"
 
 import * as z from "zod"
@@ -82,12 +82,12 @@ export function CreateForm() {
   const { startUpload, isUploading } =
     useUploadThing<string>({
       endpoint: "imageUploader", // replace this with an actual endpoint name
-      onClientUploadComplete: () => { alert("uploaded successfully!"); },
+      onClientUploadComplete: () => { alert("client upload complete"); },
       onUploadError: () => { alert("error occurred while uploading"); },
     });
 
   const [files, setFiles] = useState<File[]>([]);
-
+  const [loading, setLoading] = useState<boolean>(false);
 
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
@@ -99,10 +99,8 @@ export function CreateForm() {
   };
 
   async function onSubmit(data: AppointmentFormValues) {
-    let today = new Date();
-
+    setLoading(true);
     const appointmentDate = new Date(data.date);
-
     let [startHour, startMinutes] = data.start.split(":");
     let [endHour, endMinutes] = data.end.split(":");
 
@@ -125,14 +123,14 @@ export function CreateForm() {
 
     if (newAppointment) {
       if (files.length > 0) {
-        const urls = await startUpload(files);
-
-        urls && urls.map((url) => {
-          fetch("/api/appointments/images", {
-            method: "POST",
-            body: JSON.stringify({ image: url, appointmentId: newAppointment.id }),
-          });
+        // replace the original file name with the appointment id followed by the original file name separated by a _
+        const newFiles = files.map((file) => {
+          const newFileName = `${newAppointment.id}_${file.name}`;
+          return new File([file], newFileName, { type: file.type });
         });
+
+        await startUpload(newFiles);
+
 
         toast({
           title: "Appointment created.",
@@ -311,7 +309,6 @@ export function CreateForm() {
             <FormLabel>Upload a reference image</FormLabel>
             <FormControl>
               <UploadDropzone onFilesChanged={handleFilesChanged} />
-
             </FormControl>
           </FormItem>
 
@@ -349,7 +346,10 @@ export function CreateForm() {
           />
 
         </div>
-        <Button variant="default" type="submit">Create appointment</Button>
+        <Button disabled={isUploading || loading} variant="default" type="submit">
+          {isUploading || loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          Create appointment
+        </Button>
       </form>
     </Form>
   )

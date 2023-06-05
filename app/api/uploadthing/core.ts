@@ -1,4 +1,5 @@
 /** app/api/uploadthing/core.ts */
+import { PrismaClient } from "@prisma/client";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 
 const f = createUploadthing();
@@ -21,10 +22,20 @@ export const ourFileRouter = {
       return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      // This code RUNS ON YOUR SERVER after upload
-      console.log("Upload complete for userId:", metadata.userId);
+      const prisma = new PrismaClient();
+      const [resourceId, _originalFileName] = file.name.split("_");
 
-      console.log("file url", file.url);
+      // conver resource id to number
+      const resourceIdNumber = parseInt(resourceId);
+
+      // save the file url to the database
+      await prisma.image.create({
+        data: {
+          url: file.url,
+          appointment: { connect: { id: resourceIdNumber } },
+        },
+      });
+
     }),
 } satisfies FileRouter;
 
