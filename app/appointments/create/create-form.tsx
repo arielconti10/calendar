@@ -1,5 +1,4 @@
 "use client"
-
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon, Check, ChevronsUpDown } from "lucide-react"
@@ -19,7 +18,6 @@ import { toast } from "@/components/ui/use-toast"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -34,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { useUploadThing } from "@/utils/useUploadThing"
 
 const appointmentFormSchema = z.object({
   date: z.date({
@@ -46,9 +45,24 @@ const appointmentFormSchema = z.object({
     required_error: "A place is required.",
   }),
   status: z.enum(['pending', 'confirmed', 'cancelled']),
-  notes: z.string().optional(),
-  estimatedValue: z.string().optional(),
-  bodyPart: z.enum(['head', 'neck', 'shoulders', 'back', 'arms', 'hands', 'legs', 'feet']),
+  notes: z.string({
+    required_error: "Add your notes about the project.",
+  }),
+  start: z.string({
+    required_error: "Add the start time of the project.",
+  }),
+  end: z.string({
+    required_error: "Add the end time of the project.",
+  }),
+  style: z.string({
+    required_error: "Add the style of the project.",
+  }),
+  estimatedValue: z.string({
+    required_error: "Add the estimated value of the project.",
+  }),
+  bodyPart: z.enum(['head', 'neck', 'shoulders', 'back', 'arms', 'hands', 'legs', 'feet'], {
+    required_error: "Select where the tattoo will be made.",
+  }),
 })
 
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>
@@ -59,22 +73,41 @@ const defaultValues: Partial<AppointmentFormValues> = {
 }
 
 export function CreateForm() {
+  const { startUpload, isUploading } = useUploadThing({
+    endpoint: "imageUploader"
+  })
+
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
     defaultValues,
   })
 
-  console.log(form, 'form')
+  async function onSubmit(data: AppointmentFormValues) {
+    let today = new Date();
+    let [startHour, startMinutes] = data.start.split(":");
+    let [endHour, endMinutes] = data.end.split(":");
 
-  function onSubmit(data: AppointmentFormValues) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    })
+    let start = new Date(today.getFullYear(), today.getMonth(), today.getDate(), parseInt(startHour), parseInt(startMinutes));
+    let end = new Date(today.getFullYear(), today.getMonth(), today.getDate(), parseInt(endHour), parseInt(endMinutes));
+
+    data.start = start.toISOString();
+    data.end = end.toISOString();
+
+    try {
+
+      const newAppointment = await fetch("/api/appointments", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }).then((res) => res.json())
+
+      if (newAppointment.id) {
+        window.location.href = "/";
+      }
+
+
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return (
@@ -104,6 +137,7 @@ export function CreateForm() {
                 <FormControl>
                   <Input placeholder="Studio" {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -151,6 +185,19 @@ export function CreateForm() {
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="style"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Style</FormLabel>
+                <FormControl>
+                  <Input placeholder="Style" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -197,16 +244,43 @@ export function CreateForm() {
 
           <FormField
             control={form.control}
-            name="status"
+            name="start"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>status</FormLabel>
+                <FormLabel>Start time</FormLabel>
                 <FormControl>
-                  <Input placeholder="status" {...field} type="number" />
+                  <Input placeholder="Start time" {...field} type="time" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
+          />
+
+          <FormField
+            control={form.control}
+            name="end"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>End time</FormLabel>
+                <FormControl>
+                  <Input placeholder="End time" {...field} type="time" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormItem>
+            <FormLabel>Upload a reference image</FormLabel>
+            <FormControl>
+              <Input type="file" multiple />
+            </FormControl>
+          </FormItem>
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => <Input placeholder="status" {...field} type="hidden" value="pending" />}
           />
         </div>
         <div>
@@ -217,16 +291,18 @@ export function CreateForm() {
               <FormItem>
                 <FormLabel>Notes</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Notes" {...field} />
+                  <Textarea placeholder="Add any additional notes about the appointment." {...field} />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
-          <FormDescription className="mt-2">
-            Add any additional notes about the appointment.
-          </FormDescription>
+
         </div>
-        <Button type="submit">Create appointment</Button>
+        {/* <div>
+          <OurUploadDropzone />
+        </div> */}
+        <Button variant="default" type="submit">Create appointment</Button>
       </form>
     </Form>
   )

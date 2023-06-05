@@ -7,9 +7,12 @@ const bodySchema = z.object({
   date: z.string(),
   place: z.string(),
   clientName: z.string(),
+  start: z.string(),
+  end: z.string(),
+  style: z.string(),
   status: z.enum(['pending', 'confirmed', 'cancelled']),
   notes: z.string().optional(),
-  estimatedValue: z.number().optional(),
+  estimatedValue: z.string(),
   bodyPart: z.enum(['head', 'neck', 'shoulders', 'back', 'arms', 'hands', 'legs', 'feet']),
 })
 
@@ -34,6 +37,9 @@ export async function POST(request: NextRequest) {
       data: {
         date: validatedBody.date,
         place: validatedBody.place,
+        start: validatedBody.start,
+        end: validatedBody.end,
+        style: validatedBody.style,
         clientName: validatedBody.clientName,
         status: validatedBody.status,
         notes: validatedBody.notes,
@@ -45,6 +51,7 @@ export async function POST(request: NextRequest) {
     // return the appointment
     return NextResponse.json(appointment)
   } catch (error) {
+    console.log(error)
     // return an error response if the request body doesn't match the schema
     return NextResponse.json('Invalid request body')
   }

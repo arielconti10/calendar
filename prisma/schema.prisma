@@ -20,7 +20,7 @@ model Appointment {
   style          String
   place          String
   clientName     String
-  estimatedValue Float?
+  estimatedValue String?
   status         String
   notes          String?
   bodyPart       String

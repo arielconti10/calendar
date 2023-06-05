@@ -1,17 +1,36 @@
-export default function IndexPage() {
+import Link from "next/link"
+import { Appointment } from "@prisma/client"
+import { Plus, Slash } from 'lucide-react'
+
+import { Separator } from "@/components/ui/separator"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { buttonVariants } from "@/components/ui/button"
+import Calendar from "@/components/calendar"
+
+
+async function getAppointments() {
+  const appointments = await fetch("http://localhost:3000/api/appointments", {
+    cache: "no-cache",
+  })
+  return appointments.json()
+}
+
+export default async function Appointments() {
+  const appointments = await getAppointments()
+  const date = new Date().toISOString();
+
   return (
     <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
-      <div className="flex max-w-[980px] flex-col items-start gap-2">
-        <h1 className="text-3xl font-extrabold leading-tight tracking-tighter sm:text-3xl md:text-5xl lg:text-6xl">
-          Beautifully designed components <br className="hidden sm:inline" />
-          built with Radix UI and Tailwind CSS.
-        </h1>
-        <p className="max-w-[700px] text-lg text-muted-foreground sm:text-xl">
-          Accessible and customizable components that you can copy and paste
-          into your apps. Free. Open Source. And Next.js 13 Ready.
-        </p>
+      <div className="flex flex-1 justify-between">
+        <h1>My Appointments</h1>
+        <Link href="/appointments/create" className={buttonVariants({ variant: "default" })}>
+          <Plus className="mr-2 h-4 w-4" /> Add New
+        </Link>
       </div>
-
-    </section>
+      <Separator />
+      <div className="w-full">
+        <Calendar events={appointments} />
+      </div>
+    </section >
   )
 }
