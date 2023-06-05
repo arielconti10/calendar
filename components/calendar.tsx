@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Image from 'next/image'
+import Link from 'next/link'
 
 const mLocalizer = momentLocalizer(moment)
 
@@ -149,7 +150,10 @@ export default function Basic({
               {selectedEvent.images && selectedEvent.images.length > 0 && (
                 <div className="grid grid-cols-4 items-center gap-4">
                   {selectedEvent.images.map((image) => (
-                    <Image alt="" src={image.url} key={image.id} width="200" height="100" />
+                    // Need to open the image in a new tab
+                    <Link href={image.url} target='_blank'>
+                      <Image alt="" src={image.url} key={image.id} width="200" height="100" />
+                    </Link>
                   ))}
                 </div>
               )}
