@@ -80,8 +80,6 @@ export function AccountForm() {
     defaultValues,
   })
 
-  console.log('form da porra', form)
-
   function onSubmit(data: AccountFormValues) {
     toast({
       title: "You submitted the following values:",
