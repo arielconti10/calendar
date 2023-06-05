@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient();
 
-export async function addImageToAppointment(appointmentId: number, imageUrl: string) {
+async function addImageToAppointment(appointmentId: number, imageUrl: string) {
   const appointment = await prisma.appointment.findUnique({
     where: { id: appointmentId },
     include: { images: true },
@@ -26,8 +26,6 @@ export async function addImageToAppointment(appointmentId: number, imageUrl: str
 
 export async function POST(request: NextRequest) {
   const body = await request.json()
-
-  console.log(body)
 
   const { appointmentId, url } = body;
 
