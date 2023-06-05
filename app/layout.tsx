@@ -1,5 +1,5 @@
-import "@/styles/globals.css"
 import "@uploadthing/react/styles.css";
+import "@/styles/globals.css"
 
 import { Metadata } from "next"
 

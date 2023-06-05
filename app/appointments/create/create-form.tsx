@@ -1,8 +1,12 @@
 "use client"
+import { useState } from "react"
+import { DANGEROUS__uploadFiles } from "uploadthing/client";
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon, Check, ChevronsUpDown } from "lucide-react"
 import { useForm } from "react-hook-form"
+
 import * as z from "zod"
 
 import { cn } from "@/lib/utils"
@@ -33,9 +37,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useUploadThing } from "@/utils/useUploadThing"
-import { useState } from "react"
-import { UploadDropzone, Uploader } from "@/components/upload"
-import { OurFileRouter } from "@/app/api/uploadthing/core"
+import { UploadDropzone } from "@/components/upload"
 
 const appointmentFormSchema = z.object({
   date: z.date({
@@ -77,52 +79,72 @@ const defaultValues: Partial<AppointmentFormValues> = {
 }
 
 export function CreateForm() {
-  const { startUpload, isUploading } = useUploadThing({
-    endpoint: "imageUploader"
-  })
+  const { startUpload, isUploading } =
+    useUploadThing<string>({
+      endpoint: "imageUploader", // replace this with an actual endpoint name
+      onClientUploadComplete: () => { alert("uploaded successfully!"); },
+      onUploadError: () => { alert("error occurred while uploading"); },
+    });
 
-  const [image, setImage] = useState([]);
+  const [files, setFiles] = useState<File[]>([]);
+
 
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
     defaultValues,
   })
 
+  const handleFilesChanged = (newFiles: File[]) => {
+    setFiles(newFiles);
+  };
+
   async function onSubmit(data: AppointmentFormValues) {
     let today = new Date();
+
+    const appointmentDate = new Date(data.date);
+
     let [startHour, startMinutes] = data.start.split(":");
     let [endHour, endMinutes] = data.end.split(":");
 
-    let start = new Date(today.getFullYear(), today.getMonth(), today.getDate(), parseInt(startHour), parseInt(startMinutes));
-    let end = new Date(today.getFullYear(), today.getMonth(), today.getDate(), parseInt(endHour), parseInt(endMinutes));
+    let start = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate(), parseInt(startHour), parseInt(startMinutes));
+    let end = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate(), parseInt(endHour), parseInt(endMinutes));
 
     data.start = start.toISOString();
     data.end = end.toISOString();
 
-    try {
+    const response = await fetch("/api/appointments", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
 
-      const newAppointment = await fetch("/api/appointments", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }).then((res) => res.json())
-
-      if (image) {
-        const urls = await startUpload(image);
-        console.log(urls)
-
-        // urls && urls.map((url) => {
-        //   const image = addImageToAppointment(newAppointment.id, url.fileUrl);
-        //   console.log(image)
-        // });
-      }
-
-      // if (newAppointment.id) {
-      //   window.location.href = "/";
-      // }
-
-    } catch (error) {
-      console.error(error)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    const newAppointment = await response.json();
+
+    if (newAppointment) {
+      if (files.length > 0) {
+        const urls = await startUpload(files);
+
+        urls && urls.map((url) => {
+          fetch("/api/appointments/images", {
+            method: "POST",
+            body: JSON.stringify({ image: url, appointmentId: newAppointment.id }),
+          });
+        });
+
+        toast({
+          title: "Appointment created.",
+          description: "Your appointment has been created.",
+        });
+
+        form.reset();
+
+        window.location.href = "/";
+      }
+    }
+
   }
 
   return (
@@ -288,7 +310,8 @@ export function CreateForm() {
           <FormItem>
             <FormLabel>Upload a reference image</FormLabel>
             <FormControl>
-              <UploadDropzone<OurFileRouter> endpoint="imageUploader" />
+              <UploadDropzone onFilesChanged={handleFilesChanged} />
+
             </FormControl>
           </FormItem>
 
@@ -326,9 +349,6 @@ export function CreateForm() {
           />
 
         </div>
-        {/* <div>
-          <OurUploadDropzone />
-        </div> */}
         <Button variant="default" type="submit">Create appointment</Button>
       </form>
     </Form>
