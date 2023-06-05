@@ -4,8 +4,7 @@ import { Plus, Slash } from 'lucide-react'
 
 import { Separator } from "@/components/ui/separator"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Caladea } from "next/font/google"
+import { buttonVariants } from "@/components/ui/button"
 import Calendar from "@/components/calendar"
 
 

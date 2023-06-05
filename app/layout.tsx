@@ -1,4 +1,6 @@
 import "@/styles/globals.css"
+import "@uploadthing/react/styles.css";
+
 import { Metadata } from "next"
 
 import { siteConfig } from "@/config/site"

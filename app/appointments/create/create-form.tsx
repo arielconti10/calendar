@@ -33,6 +33,9 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useUploadThing } from "@/utils/useUploadThing"
+import { useState } from "react"
+import { UploadDropzone, Uploader } from "@/components/upload"
+import { OurFileRouter } from "@/app/api/uploadthing/core"
 
 const appointmentFormSchema = z.object({
   date: z.date({
@@ -63,6 +66,7 @@ const appointmentFormSchema = z.object({
   bodyPart: z.enum(['head', 'neck', 'shoulders', 'back', 'arms', 'hands', 'legs', 'feet'], {
     required_error: "Select where the tattoo will be made.",
   }),
+  image: z.string().optional(),
 })
 
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>
@@ -76,6 +80,8 @@ export function CreateForm() {
   const { startUpload, isUploading } = useUploadThing({
     endpoint: "imageUploader"
   })
+
+  const [image, setImage] = useState([]);
 
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
@@ -100,10 +106,19 @@ export function CreateForm() {
         body: JSON.stringify(data),
       }).then((res) => res.json())
 
-      if (newAppointment.id) {
-        window.location.href = "/";
+      if (image) {
+        const urls = await startUpload(image);
+        console.log(urls)
+
+        // urls && urls.map((url) => {
+        //   const image = addImageToAppointment(newAppointment.id, url.fileUrl);
+        //   console.log(image)
+        // });
       }
 
+      // if (newAppointment.id) {
+      //   window.location.href = "/";
+      // }
 
     } catch (error) {
       console.error(error)
@@ -273,9 +288,21 @@ export function CreateForm() {
           <FormItem>
             <FormLabel>Upload a reference image</FormLabel>
             <FormControl>
-              <Input type="file" multiple />
+              <UploadDropzone<OurFileRouter> endpoint="imageUploader" />
             </FormControl>
           </FormItem>
+
+          <FormField
+            control={form.control}
+            name="image"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input type="hidden" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
