@@ -4,3 +4,8 @@ export interface NavItem {
   disabled?: boolean
   external?: boolean
 }
+
+const nav: NavItem = {
+  title: 'Home',
+  href: '/'
+}
