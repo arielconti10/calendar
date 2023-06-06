@@ -1,9 +1,7 @@
 import Link from "next/link"
-import { Appointment } from "@prisma/client"
-import { Plus, Slash } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 import { Separator } from "@/components/ui/separator"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { buttonVariants } from "@/components/ui/button"
 import Calendar from "@/components/calendar"
 
@@ -30,32 +28,6 @@ export default async function Appointments() {
       <Separator />
       <div className="w-full">
         <Calendar events={appointments} />
-        {/* {appointments.map((appointment: Appointment) => (
-          <Card key={appointment.id}>
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl">
-                <h2 className="text-lg font-semibold">{appointment.clientName} at {appointment.place}</h2>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Body part: {appointment.bodyPart}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Date: {appointment.date.toLocaleString("pt-BR")}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Notes: {appointment.notes}
-              </p>
-            </CardContent>
-            <CardFooter className="spacing-y-1 gap-4">
-              <Button variant="default">View details</Button>
-              <Button variant="destructive">
-                <Slash className="mr-2 h-4 w-4" />Cancel
-              </Button>
-            </CardFooter>
-          </Card>
-        ))} */}
       </div>
     </section >
   )

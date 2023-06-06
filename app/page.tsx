@@ -1,9 +1,7 @@
 import Link from "next/link"
-import { Appointment } from "@prisma/client"
-import { Plus, Slash } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 import { Separator } from "@/components/ui/separator"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { buttonVariants } from "@/components/ui/button"
 import Calendar from "@/components/calendar"
 
@@ -17,7 +15,6 @@ async function getAppointments() {
 
 export default async function Appointments() {
   const appointments = await getAppointments()
-  const date = new Date().toISOString();
 
   return (
     <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
