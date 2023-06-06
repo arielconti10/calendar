@@ -15,7 +15,6 @@ async function getAppointments() {
 
 export default async function Appointments() {
   const appointments = await getAppointments()
-  const date = new Date().toISOString();
 
   return (
     <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
