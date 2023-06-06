@@ -1,10 +1,8 @@
 import Link from "next/link"
 import { Plus } from 'lucide-react'
-
 import { Separator } from "@/components/ui/separator"
 import { buttonVariants } from "@/components/ui/button"
 import Calendar from "@/components/calendar"
-
 
 async function getAppointments() {
   const appointments = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointments`, {

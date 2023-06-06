@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient();
+const client = new PrismaClient();
 
 export async function addImageToAppointment(appointmentId: number, imageUrl: string) {
-  const appointment = await prisma.appointment.findUnique({
+  const appointment = await client.appointment.findUnique({
     where: { id: appointmentId },
     include: { images: true },
   });
@@ -12,7 +12,7 @@ export async function addImageToAppointment(appointmentId: number, imageUrl: str
     throw new Error(`Appointment with ID ${appointmentId} not found`);
   }
 
-  const image = await prisma.image.create({
+  const image = await client.image.create({
     data: {
       url: imageUrl,
       appointment: { connect: { id: appointmentId } },
@@ -23,7 +23,6 @@ export async function addImageToAppointment(appointmentId: number, imageUrl: str
 }
 
 export async function getAppointments() {
-  const client = new PrismaClient();
   const appointments = await client.appointment.findMany()
   return appointments
 }
