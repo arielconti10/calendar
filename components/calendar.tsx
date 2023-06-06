@@ -1,7 +1,9 @@
 'use client'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import React, { useMemo } from 'react'
-import PropTypes from 'prop-types'
+import { Prisma } from '@prisma/client';
+import Image from 'next/image'
+import Link from 'next/link'
 import moment from 'moment'
 import {
   Calendar as BigCalendar,
@@ -9,14 +11,13 @@ import {
   DateLocalizer,
   momentLocalizer,
 } from 'react-big-calendar'
+
 import * as dates from '@/utils/dates'
-import { Prisma } from '@prisma/client'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog'
-import { Button } from '@/components/ui/button'
+
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import Image from 'next/image'
-import Link from 'next/link'
+
 
 const mLocalizer = momentLocalizer(moment)
 
@@ -33,23 +34,27 @@ type Appointment = Prisma.AppointmentGetPayload<{
   }
 }>;
 
-interface BasicProps {
+interface CalendarProps {
   events: Appointment[]
   localizer?: DateLocalizer
-  showDemoLink?: boolean
 }
 
-export default function Basic({
-  events,
-  localizer = mLocalizer,
-  ...props
-}: BasicProps) {
+export default function Calendar({ events }: CalendarProps) {
+  const localizer = mLocalizer
   const [showDialog, setShowDialog] = React.useState(false)
-
-  // selectedEvent is one Appointment, we need to include the images in the appointment
-
-
   const [selectedEvent, setSelectedEvent] = React.useState<Appointment | null>(null)
+
+  const parsedEvents = events.map((event) => {
+    const start = new Date(event.start);
+    const end = new Date(event.end);
+
+    return {
+      ...event,
+      title: event.clientName,
+      start,
+      end
+    };
+  });
 
   const { defaultDate, max, views } = useMemo(
     () => ({
@@ -69,38 +74,28 @@ export default function Basic({
     []
   )
 
-  const parsedEvents = events.map((event) => {
-    const start = new Date(event.start);
-    const end = new Date(event.end);
-
-    return {
-      ...event,
-      title: event.clientName,
-      start,
-      end
-    };
-  });
-
   return (
-    <div className="h-[600px] w-full">
-      <BigCalendar
-        components={{
-          timeSlotWrapper: ({ children }: any) => (
-            <ColoredDateCellWrapper>{children}</ColoredDateCellWrapper>
-          ),
-        }}
-        defaultDate={defaultDate}
-        onSelectEvent={(event) => {
-          setShowDialog(true)
-          setSelectedEvent(event)
-        }}
-        events={parsedEvents}
-        localizer={localizer}
-        max={max}
-        showMultiDayTimes
-        step={60}
-        views={views}
-      />
+    <div>
+      <div className="h-[600px] w-full">
+        <BigCalendar
+          components={{
+            timeSlotWrapper: ({ children }: any) => (
+              <ColoredDateCellWrapper>{children}</ColoredDateCellWrapper>
+            ),
+          }}
+          defaultDate={defaultDate}
+          onSelectEvent={(event) => {
+            setShowDialog(true)
+            setSelectedEvent(event)
+          }}
+          events={parsedEvents}
+          localizer={localizer}
+          max={max}
+          showMultiDayTimes
+          step={60}
+          views={views}
+        />
+      </div>
 
       <Dialog modal={true} open={showDialog} onOpenChange={() => setShowDialog(!showDialog)}>
         <DialogContent className="sm:max-w-[600px]">
@@ -150,8 +145,7 @@ export default function Basic({
               {selectedEvent.images && selectedEvent.images.length > 0 && (
                 <div className="grid grid-cols-4 items-center gap-4">
                   {selectedEvent.images.map((image) => (
-                    // Need to open the image in a new tab
-                    <Link href={image.url} target='_blank'>
+                    <Link href={image.url} target='_blank' >
                       <Image alt="" src={image.url} key={image.id} width="200" height="100" />
                     </Link>
                   ))}
@@ -160,15 +154,10 @@ export default function Basic({
             </div>
           )}
           {/* <DialogFooter>
-            <Button type="submit">Save changes</Button>
-          </DialogFooter> */}
+             <Button type="submit">Save changes</Button>
+           </DialogFooter> */}
         </DialogContent>
       </Dialog>
-    </div>
-
+    </div >
   )
-}
-Basic.propTypes = {
-  localizer: PropTypes.instanceOf(DateLocalizer),
-  showDemoLink: PropTypes.bool,
 }

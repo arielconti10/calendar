@@ -7,15 +7,14 @@ import Calendar from "@/components/calendar"
 
 
 async function getAppointments() {
-
-  const appointments = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/appointments`, {
+  const appointments = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointments`, {
     cache: "no-cache",
   })
 
   return appointments.json()
 }
 
-export default async function Appointments() {
+export default async function Page() {
   const appointments = await getAppointments()
 
   return (
