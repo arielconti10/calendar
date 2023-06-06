@@ -16,7 +16,7 @@ const bodySchema = z.object({
   bodyPart: z.enum(['head', 'neck', 'shoulders', 'back', 'arms', 'hands', 'legs', 'feet']),
 })
 
-export async function GET() {
+export const GET = async () => {
   const client = new PrismaClient()
 
   // get all appointments from the database, including the images
@@ -27,7 +27,7 @@ export async function GET() {
   return NextResponse.json(appointments)
 }
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   const client = new PrismaClient()
 
   // get the request body

@@ -7,9 +7,10 @@ import Calendar from "@/components/calendar"
 
 
 async function getAppointments() {
-  const appointments = await fetch("http://localhost:3000/api/appointments", {
+  const appointments = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointments`, {
     cache: "no-cache",
   })
+
   return appointments.json()
 }
 

@@ -1,10 +1,9 @@
 "use client"
 import { useState } from "react"
-import { Loader2 } from "lucide-react"
+import { Loader2, Calendar as CalendarIcon } from "lucide-react"
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
 import { useForm } from "react-hook-form"
 
 import * as z from "zod"
@@ -238,7 +237,7 @@ export function CreateForm() {
             control={form.control}
             name="date"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
+              <FormItem>
                 <FormLabel>Select the date of the tattoo</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>

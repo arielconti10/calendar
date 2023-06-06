@@ -24,7 +24,7 @@ async function addImageToAppointment(appointmentId: number, imageUrl: string) {
   return image;
 }
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   const body = await request.json()
 
   const { appointmentId, url } = body;
