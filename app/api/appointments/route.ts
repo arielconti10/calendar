@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 import { z } from 'zod'
 
+const client = new PrismaClient()
 // define the schema for the request body
 const bodySchema = z.object({
   date: z.string(),
@@ -17,8 +18,6 @@ const bodySchema = z.object({
 })
 
 export const GET = async () => {
-  const client = new PrismaClient()
-
   // get all appointments from the database, including the images
   const appointments = await client.appointment.findMany({
     include: { images: true },
@@ -28,7 +27,7 @@ export const GET = async () => {
 }
 
 export const POST = async (request: NextRequest) => {
-  const client = new PrismaClient()
+
 
   // get the request body
   const body = await request.json()
