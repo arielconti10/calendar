@@ -3,9 +3,11 @@ import { Plus } from 'lucide-react'
 import { Separator } from "@/components/ui/separator"
 import { buttonVariants } from "@/components/ui/button"
 import Calendar from "@/components/calendar"
+import { getBaseUrl } from "@/lib/getBaseUrl"
 
 async function getAppointments() {
-  const appointments = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointments`, {
+  const baseUrl = getBaseUrl();
+  const appointments = await fetch(`${baseUrl}/api/appointments`, {
     cache: "no-cache",
   })
 
